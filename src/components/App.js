@@ -37,12 +37,20 @@ class App extends Component {
     //Load accounts
     const accounts = await web3.eth.getAccounts();
     console.log(accounts);
-    this.setState({account: accounts[0]})
     //Add first account the the state
+    this.setState({ account: accounts[0] });
 
     //Get network ID
+    const networkId = await web3.eth.net.getId();
     //Get network data
+    const networkData = DVideo.networks[networkId];
     //Check if net data exists, then
+    if (networkData) {
+      const dvideo = new web3.eth.Contract(DVideo.abi, networkData.address);
+      console.log(dvideo);
+    } else {
+      window.alert("DVideo contract not deployed to detected network");
+    }
     //Assign dvideo contract to a variable
     //Add dvideo to the state
 
@@ -70,7 +78,7 @@ class App extends Component {
     super(props);
     this.state = {
       loading: false,
-      account: ''
+      account: "",
       //set states
     };
 
@@ -81,8 +89,8 @@ class App extends Component {
     return (
       <div>
         <Navbar
-        //Account
-        account={this.state.account}
+          //Account
+          account={this.state.account}
         />
         {this.state.loading ? (
           <div id="loader" className="text-center mt-5">
