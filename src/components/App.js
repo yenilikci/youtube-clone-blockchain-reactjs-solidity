@@ -47,7 +47,26 @@ class App extends Component {
     //Check if net data exists, then
     if (networkData) {
       const dvideo = new web3.eth.Contract(DVideo.abi, networkData.address);
-      console.log(dvideo);
+      this.setState({ dvideo });
+
+      const videosCount = await dvideo.methods.videoCount().call();
+      this.setState({ videosCount });
+
+      // Load videos, sort by newest
+      for (var i = videosCount; i >= 1; i--) {
+        const video = await dvideo.methods.videos(i).call();
+        this.setState({
+          videos: [...this.state.videos, video],
+        });
+      }
+
+      //Set latest video with title to view as default
+      const latest = await dvideo.methods.videos(videosCount).call();
+      this.setState({
+        currentHash: latest.hash,
+        currentTitle: latest.title,
+      });
+      this.setState({ loading: false });
     } else {
       window.alert("DVideo contract not deployed to detected network");
     }
@@ -80,6 +99,11 @@ class App extends Component {
       loading: false,
       account: "",
       //set states
+      dvideo: null,
+      videos: [],
+      loading: true,
+      currentHash: null,
+      currentTitle: null,
     };
 
     //Bind functions
